@@ -38,6 +38,23 @@ class _SimpleCalcScreenState extends State<SimpleCalcScreen> {
     });
   }
 
+  void _backspace() {
+    String currentText = _inputController.text;
+    if (currentText.isNotEmpty) {
+      // Remove last character
+      String newText = currentText.substring(0, currentText.length - 1);
+      
+      // If the last character was a space, remove the character before it as well
+      if (newText.isNotEmpty && newText.endsWith(' ')) {
+        newText = newText.substring(0, newText.length - 1);
+      }
+      
+      _inputController.text = newText;
+      _inputController.text = _formatExpression(_inputController.text);
+      setState(() {});
+    }
+  }
+
   void _calculate() {
     try {
       Expression expression = Expression.parse(_inputController.text.replaceAll(' ', ''));
@@ -64,80 +81,81 @@ class _SimpleCalcScreenState extends State<SimpleCalcScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Simple Calc | Michael Tedeschi'),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: Container(
-              color: Colors.grey[300],
-              padding: const EdgeInsets.all(8),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Simple Calc | Michael Tedeschi'),
+    ),
+    body: Column(
+      children: [
+        Expanded(
+          child: Container(
+            color: Colors.grey[300],
+            padding: const EdgeInsets.all(8),
+            alignment: Alignment.bottomRight,
+            child: Align(
               alignment: Alignment.bottomRight,
-              child: FittedBox( // Using FittedBox for the accumulator input display to prevent overflow of text
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerRight,
-                child: Text(
-                  _inputController.text,
-                  style: const TextStyle(fontSize: 24),
-                ),
+              child: Text(
+                _inputController.text,
+                style: const TextStyle(fontSize: 24),
               ),
             ),
           ),
-          Expanded(
-            child: Container(
-              color: Colors.grey[400],
-              padding: const EdgeInsets.all(8),
+        ),
+        Expanded(
+          child: Container(
+            color: Colors.grey[400],
+            padding: const EdgeInsets.all(8),
+            alignment: Alignment.bottomRight,
+            child: Align(
               alignment: Alignment.bottomRight,
-              child: FittedBox( // using FittedBox for the output display to prevent overflow of text
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerRight,
-                child: Text(
-                  _output,
-                  style: const TextStyle(fontSize: 24),
-                ),
+              child: Text(
+                _output,
+                style: const TextStyle(fontSize: 24),
               ),
             ),
           ),
-          Row(
-            children: [
-              _buildButton('7'),
-              _buildButton('8'),
-              _buildButton('9'),
-              _buildButton('+'),
-            ],
-          ),
-          Row(
-            children: [
-              _buildButton('4'),
-              _buildButton('5'),
-              _buildButton('6'),
-              _buildButton('-'),
-            ],
-          ),
-          Row(
-            children: [
-              _buildButton('1'),
-              _buildButton('2'),
-              _buildButton('3'),
-              _buildButton('*'),
-            ],
-          ),
-          Row(
-            children: [
-              _buildButton('0'),
-              _buildButton('C'),
-              _buildButton('='),
-              _buildButton('/'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+        Row(
+          children: [
+            _buildButton('7'),
+            _buildButton('8'),
+            _buildButton('9'),
+            _buildButton('+'),
+          ],
+        ),
+        Row(
+          children: [
+            _buildButton('4'),
+            _buildButton('5'),
+            _buildButton('6'),
+            _buildButton('-'),
+          ],
+        ),
+        Row(
+          children: [
+            _buildButton('1'),
+            _buildButton('2'),
+            _buildButton('3'),
+            _buildButton('*'),
+          ],
+        ),
+        Row(
+          children: [
+            _buildButton('0'),
+            _buildButton('DEL'), // Backspace button
+            _buildButton('C'),
+            _buildButton('='),
+            _buildButton('/'),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+
 
   String _formatExpression(String expression) {
     return expression.replaceAllMapped(RegExp(r'(\d)([+\-*/])|([+\-*/])(\d)'), (match) {
@@ -158,6 +176,8 @@ class _SimpleCalcScreenState extends State<SimpleCalcScreen> {
             _calculate();
           } else if (text == 'C') {
             _clearInput();
+          } else if (text == 'DEL') {
+            _backspace();
           } else {
             _inputController.text += text;
             _inputController.text = _formatExpression(_inputController.text);
